@@ -34,37 +34,34 @@
 
     <x-filament::dropdown.list
         x-data="{
-            mode: null,
-
             theme: null,
 
             init: function () {
-                this.theme = localStorage.getItem('theme') || (this.isSystemDark() ? 'dark' : 'light')
-                this.mode = localStorage.getItem('theme') ? 'manual' : 'auto'
+                this.theme = localStorage.getItem('theme') || 'system'
 
                 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
-                    if (this.mode === 'manual') return
+                    if (this.theme != 'system') return
 
                     if (event.matches && (! document.documentElement.classList.contains('dark'))) {
-                        this.theme = 'dark'
-
                         document.documentElement.classList.add('dark')
                     } else if ((! event.matches) && document.documentElement.classList.contains('dark')) {
-                        this.theme = 'light'
-
                         document.documentElement.classList.remove('dark')
                     }
                 })
 
                 $watch('theme', () => {
-                    if (this.mode === 'auto') return
-
                     localStorage.setItem('theme', this.theme)
 
                     if (this.theme === 'dark' && (! document.documentElement.classList.contains('dark'))) {
                         document.documentElement.classList.add('dark')
                     } else if (this.theme === 'light' && document.documentElement.classList.contains('dark')) {
                         document.documentElement.classList.remove('dark')
+                    } else if (this.theme === 'system') {
+                        if (this.isSystemDark() && (! document.documentElement.classList.contains('dark'))) {
+                            document.documentElement.classList.add('dark')
+                        } else if (! this.isSystemDark() && (document.documentElement.classList.contains('dark'))) {
+                            document.documentElement.classList.remove('dark')
+                        }
                     }
 
                     $dispatch('dark-mode-toggled', this.theme)
@@ -78,12 +75,16 @@
     >
         <div>
             @if (filament()->hasDarkMode() && (! filament()->hasDarkModeForced()))
-                <x-filament::dropdown.list.item icon="heroicon-m-moon" x-show="theme === 'dark'" x-on:click="close(); mode = 'manual'; theme = 'light'">
+                <x-filament::dropdown.list.item icon="heroicon-m-moon" color="gray" x-on:click="close(); theme = 'light'">
                     {{ __('filament::layout.buttons.light_mode.label') }}
                 </x-filament::dropdown.list.item>
 
-                <x-filament::dropdown.list.item icon="heroicon-m-sun" x-show="theme === 'light'" x-on:click="close(); mode = 'manual'; theme = 'dark'">
+                <x-filament::dropdown.list.item icon="heroicon-m-sun" color="gray" x-on:click="close(); theme = 'dark'">
                     {{ __('filament::layout.buttons.dark_mode.label') }}
+                </x-filament::dropdown.list.item>
+
+                <x-filament::dropdown.list.item icon="heroicon-m-cog" color="gray" x-on:click="close(); theme = 'system'">
+                    {{ __('filament::layout.buttons.system_mode.label') }}
                 </x-filament::dropdown.list.item>
             @endif
         </div>

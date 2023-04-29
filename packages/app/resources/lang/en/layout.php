@@ -38,6 +38,10 @@ return [
 
         ],
 
+        'system_mode' => [
+            'label' => 'Toggle system mode',
+        ],
+
         'user_menu' => [
             'label' => 'User menu',
         ],
